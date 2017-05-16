@@ -1,0 +1,50 @@
+---
+- name: Download pentaho
+  get_url: url=https://ufpr.dl.sourceforge.net/project/pentaho/Data%20Integration/7.0/pdi-ce-7.0.0.0-25.zip dest=/tmp mode=755
+  register: get_pdi
+  
+  
+  tags:
+    - pentaho
+
+- name: Greate Grupo Pentaho 
+  group: name=pentaho  gid=1010 state=present
+ 
+  tags:
+    - pentaho
+
+- name: Create user Pentaho
+  user: name=pentaho  shell=/bin/bash  uid=1010  group=pentaho state=present
+
+  tags:
+    - pentaho
+
+- name: Create data directory Pentaho
+  file: path=/pentaho  state=directory  owner=pentaho group=pentaho  mode=700
+  
+  tags:
+    - pentaho
+
+
+- name: Unarchive  Pentaho
+  unarchive: src=/tmp/pdi-ce-7.0.0.0-25.zip  dest=/pentaho remote_src=True owner=pentaho group=pentaho
+
+  tags:
+    - pentaho
+
+- name: Download java
+  get_url: url=http://download.oracle.com/otn-pub/java/jdk/{{version_javaBuild}}/e9e7ea248e2c4826b92b3f075a80e441/jdk-{{version_javapkg}}-linux-x64.rpm headers="Cookie:oraclelicense=accept-securebackup-cookie" dest=/opt 
+
+- name: Instala pacote
+  yum: name=/opt/jdk-{{version_javapkg}}-linux-x64.rpm state=present
+
+  tags:
+    - pentaho
+
+
+- name: Config JAVA_HOME
+  template: src=javaenv.j2 dest=/etc/profile.d/javaenv.sh  owner=root group=root mode=0644
+
+  tags:
+    - pentaho
+

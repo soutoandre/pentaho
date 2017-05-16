@@ -1,0 +1,63 @@
+---
+- name: Create data directory Pentaho
+  file: path=/pentaho  state=directory  owner=pentaho group=pentaho  mode=700
+  
+  tags:
+    - pentaho
+
+- name: Instala pacote
+  yum: name=/opt/jdk-{{version_javapkg}}-linux-x64.rpm state=present
+
+  tags:
+    - pentaho
+
+- name: Config JAVA_HOME
+  template: src=javaenv.j2 dest=/etc/profile.d/javaenv.sh  owner=root group=root mode=0644
+  tags:
+    - pentaho
+
+
+- name: Clone config datasources pentaho repo
+  git:
+    repo: git@gitlab-example:ansible/jdbc_pentaho.git
+    dest: /tmp/jdbc
+    version: master
+    accept_hostkey: yes
+    key_file: /home/ansible/.ssh/id_rsa
+  become_user: ansible
+   tags:
+    - pentaho
+    - jdbc_pentaho
+
+- name: Copy file jdbc.properties
+  copy: src=/tmp/jdbc/jdbc.properties.j2   dest=/pentaho/data-integration/simple-jndi/jdbc.properties remote_src=yes  backup=yes owner=pentaho group=pentaho mode=0644
+   tags:
+    - pentaho
+    - jdbc_pentaho_dev
+
+- name: Config Memory Virtual Machine
+  template: src=spoon.sh.j2  dest=/pentaho/data-integration/spoon.sh owner=pentaho group=pentaho mode=0755
+  tags:
+    - pentaho
+
+- name: Conf log4j.xml Classes pentaho
+  template: src=log4j.xml.j2  dest=/pentaho/data-integration/classes/log4j.xml owner=pentaho group=pentaho mode=0644
+  tags:
+    - pentaho
+
+- name: Conf mondrian.properties Classes pentaho
+  template: src=mondrian.properties.j2  dest=/pentaho/data-integration/classes/mondrian.properties owner=pentaho group=pentaho mode=0644
+  tags:
+    - pentaho
+
+- name: Rename files kettle-registry-extensions| kettle-registry-extensions Classes pentaho
+  file: remote_src=True src=/pentaho/data-integration/classes/{{ item }} dest=/pentaho/data-integration/classes/{{ item }}.old state=file
+  with_items:
+     - kettle-lifecycle-listeners.xml
+     - kettle-registry-extensions.xml
+  tags:
+    - pentaho    
+  
+- name: install Pentaho
+  include: installpentaho.yml 
+  when: installpentaho == "True"

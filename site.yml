@@ -1,0 +1,13 @@
+---
+- name: Provisioning Pentaho
+  hosts: pentaho
+  remote_user: ansible
+  become: true
+
+  roles: 
+      - pentaho
+     
+  environment:
+     http_proxy: "http://proxy.example.com:8080" 
+     https_proxy: "http://proxy.example.com:8080"
+     no_proxy: "127.0.0.1, localhost" 

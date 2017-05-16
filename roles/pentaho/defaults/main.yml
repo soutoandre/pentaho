@@ -1,0 +1,13 @@
+---
+# Config Java
+version_java: 1.8.0_121
+version_javaBuild: 8u121-b13
+version_javapkg: 8u121
+
+# Config memory virtual machine
+#
+startmemory: 6144m
+Maxmemory: 12288m
+maxpermsize: 256m
+installpentaho: False
+
